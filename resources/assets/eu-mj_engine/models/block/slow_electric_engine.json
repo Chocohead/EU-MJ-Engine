@@ -1,0 +1,8 @@
+{
+	"parent":"eu-mj_engine:models/block/engine_base",
+    "textures": {
+        "#back": "eu-mj_engine:engine/slow/back",
+        "#front": "eu-mj_engine:engine/slow/front",
+        "#side": "eu-mj_engine:engine/slow/side"
+    }
+}

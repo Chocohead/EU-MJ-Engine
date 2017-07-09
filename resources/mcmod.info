@@ -1,0 +1,18 @@
+[
+{
+	"modid": "eu-mj_engine",
+	"name": "EU-MJ Engine",
+	"description": "Provides conversion between IndustrialCraft and BuildCraft energy",
+	"mcversion": "${mcversion}",
+	"version": "${version}",
+	"credits": "Shadowrock for the textures and Snyke for the concept.",
+	"authorList": ["Chocohead"],
+	"url": "http://forum.industrial-craft.net/",
+	"updateUrl": "",
+	"parent": "",
+	"dependencies": ["ic2", "buildcraftenergy"],
+	"dependants": [],
+	"logoFile": "",
+	"screenshots": []
+}
+]

@@ -1,0 +1,44 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "eu-mj_engine:tesr"
+	},
+	"variants": {
+		"type": {
+			"slow_electric_engine": {
+				"textures": {
+					"particle": "eu-mj_engine:engine/slow/back"
+				}
+			},
+			"regular_electric_engine": {
+				"textures": {
+					"particle": "eu-mj_engine:engine/regular/back"
+				}
+			},
+			"fast_electric_engine": {
+				"textures": {
+					"particle": "eu-mj_engine:engine/fast/back"
+				}
+			},
+			"quick_electric_engine": {
+				"textures": {
+					"particle": "eu-mj_engine:engine/quick/back"
+				}
+			},
+			"adjustable_electric_engine": {
+				"textures": {
+					"particle": "eu-mj_engine:engine/adjustable/back"
+				}
+			}
+		},
+		"facing": {
+			"down": { "x": 90 },
+			"up": { "x": 270 },
+			"north": { "transform": "forge:default-block" },
+			"south": { "y": 180 },
+			"west": { "y": 270 },
+			"east": { "y": 90 }
+		},
+		"inventory": [{}]
+	}
+}

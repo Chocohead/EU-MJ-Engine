@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gui width="205" height="204">
+	<image x="0" y="0" width="205" height="204" basesize="256" src="eu-mj_engine:textures/gui/gui_adjustable_electric_engine"/>
+	<text y="6" align="center">%name%</text>
+
+	<text y="35" align="center" color="16777215">%base.getCurrentOutput()%</text>
+
+	<slot name="discharge" x="93" y="78"/>
+	<energygauge x="98" y="63"/>
+	
+	<button x="5" y="78" width="32" height="20" event="0">-100</button>
+	<button x="41" y="78" width="26" height="20" event="1">-10</button>
+	<button x="71" y="78" width="20" height="20" event="2">-1</button>
+	<button x="113" y="78" width="20" height="20" event="3">+1</button>
+	<button x="138" y="78" width="26" height="20" event="4">+10</button>
+	<button x="168" y="78" width="32" height="20" event="5">+100</button>
+
+	<playerInventory x="21" y="120"/>
+</gui>

@@ -1,0 +1,80 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+	maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+
+repositories {
+	maven {
+		name = "ic2"
+		url = "http://maven.ic2.player.to/"
+	}
+	maven {
+		name = "buildcraft"
+		url = "http://www.mod-buildcraft.com/maven/"
+	}
+}
+
+version = "1.0"
+group = "com.chocohead.eumj"
+archivesBaseName = "EU-MJ Engine"
+
+sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = "1.8"
+}
+
+minecraft {
+    version = "1.11.2-13.20.1.2393"
+    runDir = "run"
+    replace "@VERSION@", project.version
+    
+    mappings = "snapshot_20161220"
+    makeObfSourceJar = false
+}
+
+dependencies {
+	deobfCompile "net.industrial-craft:industrialcraft-2:2.7.75-ex111:dev"
+	deobfCompile "com.mod-buildcraft:buildcraft:7.99.6"
+	//provided fileTree(dir: 'lib', include: '*.jar')
+}
+
+sourceSets { // must be defined before sourceSets is being used (e.g. processResources)
+	main {
+		java {
+			srcDir 'src'
+		}
+		resources {
+			srcDir 'resources'
+		}
+	}
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}

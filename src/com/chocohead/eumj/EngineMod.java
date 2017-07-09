@@ -1,0 +1,271 @@
+package com.chocohead.eumj;
+
+import static com.chocohead.eumj.EngineMod.MODID;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumActionResult;
+
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.RecipeSorter;
+import net.minecraftforge.oredict.RecipeSorter.Category;
+
+import buildcraft.api.BCBlocks;
+import buildcraft.api.BCItems;
+import buildcraft.api.blocks.CustomRotationHelper;
+import buildcraft.api.enums.EnumEngineType;
+import buildcraft.api.mj.MjAPI;
+import buildcraft.lib.client.guide.GuideManager;
+import buildcraft.lib.client.guide.PageLine;
+import buildcraft.lib.client.guide.loader.MarkdownPageLoader;
+import buildcraft.lib.client.guide.parts.GuideText;
+import buildcraft.lib.client.resource.ResourceRegistry;
+import buildcraft.lib.client.resource.TextureResourceHolder;
+import buildcraft.lib.gui.GuiStack;
+import buildcraft.lib.gui.ISimpleDrawable;
+import buildcraft.transport.BCTransportItems;
+
+import ic2.api.event.TeBlockFinalCallEvent;
+import ic2.api.item.IC2Items;
+
+import ic2.core.block.BlockTileEntity;
+import ic2.core.block.TeBlockRegistry;
+import ic2.core.item.ItemIC2;
+import ic2.core.util.StackUtil;
+
+import com.chocohead.eumj.item.ItemReaderMJ;
+import com.chocohead.eumj.te.Engine_TEs;
+import com.chocohead.eumj.te.TileEntityEngine;
+import com.chocohead.eumj.util.AdvEngineRecipe;
+import com.chocohead.eumj.util.BetterTextureResourceHolder;
+
+@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.6];after:buildcrafttransport", version="@VERSION@")
+public final class EngineMod {
+	public static final String MODID = "eu-mj_engine";
+	public static final CreativeTabs TAB = new CreativeTabs("EU-MJ Engine") {
+		private ItemStack[] items;
+		private int ticker;
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public ItemStack getIconItemStack() {
+			if (++ticker >= 500) {
+				ticker = 0;
+			}
+
+			if (items == null) {
+				items = new ItemStack[5];
+
+				for (int i = 0; i < Engine_TEs.VALUES.length; i++) {
+					items[i] = engine.getItemStack(Engine_TEs.VALUES[i]);
+				}
+			}
+
+			assert ticker / 100 < items.length;
+			return items[ticker / 100];
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public ItemStack getTabIconItem() {
+			return null; //Only normally called from getIconItemStack
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public String getTranslatedTabLabel() {
+			return MODID + ".creative_tab";
+		}
+	};
+
+	public static BlockTileEntity engine;
+	public static ItemIC2 readerMJ;
+
+	@EventHandler
+	public void construction(FMLConstructionEvent event) {
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	@SubscribeEvent
+	public void register(TeBlockFinalCallEvent event) {
+		TeBlockRegistry.addAll(Engine_TEs.class, Engine_TEs.IDENTITY);
+	}
+
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		loadConfig(event.getSuggestedConfigurationFile());
+		event.getModLog().info("Running with "+(Conversion.MJperEU / MjAPI.MJ)+" MJ per EU or "+(MjAPI.MJ / Conversion.MJperEU)+" EU per MJ");
+
+		//Blocks
+		engine = TeBlockRegistry.get(Engine_TEs.IDENTITY);
+		engine.setCreativeTab(TAB);
+		//Items
+		if (Loader.isModLoaded("buildcrafttransport")) {
+			readerMJ = new ItemReaderMJ();
+		}
+
+		RecipeSorter.register(MODID+":shaped", AdvEngineRecipe.class, Category.SHAPED, "after:ic2:shaped");
+
+		if (event.getSide().isClient()) {
+			MinecraftForge.EVENT_BUS.register(MagicModelLoader.class);
+			//ModelLoader.setCustomStateMapper(engine, block -> Collections.emptyMap());
+			readerMJ.registerModels(null);
+		}
+	}
+
+	private void loadConfig(File file) {
+		Configuration config = new Configuration(file);
+
+		try {
+			config.load();
+
+			Conversion.MJperEU = MjAPI.MJ * config.getFloat("MJperEU", "balance", 2F / 5F, 1F / 100, 100F, "The number of MJ per EU");
+		} catch (Exception e) {
+			throw new RuntimeException("Unexpected exception loading config!", e);
+		} finally {
+			if (config.hasChanged()) {
+				config.save();
+			}
+		}
+	}
+
+	@EventHandler
+	public void init(FMLInitializationEvent event) {
+		Engine_TEs.buildDummies(event.getSide().isClient());
+
+		if (BCBlocks.CORE_ENGINE != null) {
+			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
+					"B", "E", "C",
+					'B', IC2Items.getItem("re_battery"),
+					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.STONE.ordinal()),
+					'C', IC2Items.getItem("crafting", "circuit")));
+
+			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
+					"B", "E", "C",
+					'B', IC2Items.getItem("re_battery"),
+					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'C', IC2Items.getItem("crafting", "circuit")));
+
+			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
+					"BBB", "EPE", "CPC",
+					'B', IC2Items.getItem("advanced_re_battery"),
+					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'P', IC2Items.getItem("crafting", "alloy"),
+					'C', IC2Items.getItem("crafting", "circuit")));
+
+			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
+					"BPB", "EEE", "CPC",
+					'B', IC2Items.getItem("energy_crystal"),
+					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'P', IC2Items.getItem("crafting", "alloy"),
+					'C', IC2Items.getItem("crafting", "advanced_circuit")));
+
+			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
+					"BCB", "EEE", "MTM",
+					'B', IC2Items.getItem("lapotron_crystal"),
+					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'C', IC2Items.getItem("crafting", "advanced_circuit"),
+					'M', IC2Items.getItem("resource", "advanced_machine"),
+					'T', IC2Items.getItem("te", "hv_transformer")));
+		}
+
+		if (readerMJ != null && BCItems.CORE_GEAR_GOLD != null && BCItems.TRANSPORT_PIPE_WOOD_POWER != null) {
+			Collection<ItemStack> pipes = new HashSet<>();
+
+			for (Item pipe : new Item[] {BCTransportItems.pipePowerCobble, BCTransportItems.pipePowerStone,
+					BCTransportItems.pipePowerQuartz, BCTransportItems.pipePowerGold, BCTransportItems.pipePowerSandstone}) {
+				if (pipe != null) {
+					pipes.add(new ItemStack(pipe));
+				}
+			}
+
+			if (!pipes.isEmpty()) {
+				GameRegistry.addRecipe(new AdvEngineRecipe(new ItemStack(readerMJ),
+						" D ", "PGP", "p p",
+						'D', Items.GLOWSTONE_DUST,
+						'G', BCItems.CORE_GEAR_GOLD,
+						'P', pipes,
+						'p', BCItems.TRANSPORT_PIPE_WOOD_POWER));
+			}
+		}
+
+		//BuildCraft Lib loads pages in post-init, but it also loads first, so we do this here
+		MarkdownPageLoader.SPECIAL_FACTORIES.put("special.engineLink", after -> {
+			ItemStack stack = MarkdownPageLoader.loadItemStack(after);
+
+			PageLine line;
+			if (StackUtil.isEmpty(stack)) {
+				line = new PageLine(1, "Missing item: "+after, false);
+			} else {
+				ISimpleDrawable icon = new GuiStack(stack);
+				line = new PageLine(icon, icon, 1, stack.getDisplayName(), true);
+			}
+
+			return Collections.singletonList(gui -> new GuideText(gui, line) {
+				@Override
+				public PagePosition handleMouseClick(int x, int y, int width, int height, PagePosition current, int index, int mouseX, int mouseY) {
+					if (line.link && (wasHovered || wasIconHovered)) {
+						gui.openPage(GuideManager.INSTANCE.getPageFor(stack).createNew(gui));
+					}
+
+					return renderLine(current, text, x, y, width, height, -1);
+				}
+			});
+		});
+		ResourceRegistry.INSTANCE.register(new BetterTextureResourceHolder(MODID, "guide/images/mj_reader.png", 176, 131), TextureResourceHolder.class);
+	}
+
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		CustomRotationHelper.INSTANCE.registerHandler(engine, (world, pos, state, side) -> {
+			TileEntity te = world.getTileEntity(pos);
+
+			return te instanceof TileEntityEngine && ((TileEntityEngine) te).trySpin(side.getOpposite()) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+		});
+	}
+
+	@EventHandler
+	@SideOnly(Side.CLIENT)
+	public void finish(FMLLoadCompleteEvent event) {
+		assert event.getSide().isClient();
+
+		//BuildCraft doesn't bother doing this itself, it makes life easier being able to change pages without having to restart the game
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> GuideManager.INSTANCE.reloadLang());
+	}
+
+
+	public static class Conversion {
+		static double MJperEU = MjAPI.MJ * 2 / 5;
+
+		public static double MJtoEU(long microjoules) {
+			return microjoules / MJperEU;
+		}
+
+		public static long EUtoMJ(double EU) {
+			return (long) (EU * MJperEU);
+		}
+	}
+}

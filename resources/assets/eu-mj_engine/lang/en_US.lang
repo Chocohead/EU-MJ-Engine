@@ -1,0 +1,21 @@
+eu-mj_engine.creative_tab=EU-MJ Engine
+
+eu-mj_engine.engines.slow_electric_engine=Slow Electric Engine
+eu-mj_engine.engines.regular_electric_engine=Regular Electric Engine
+eu-mj_engine.engines.fast_electric_engine=Fast Electric Engine
+eu-mj_engine.engines.quick_electric_engine=Quick Electric Engine
+eu-mj_engine.engines.adjustable_electric_engine=Adjustable Electric Engine
+eu-mj_engine.engines.adjustable_electric_engine.info=Converting %s EU/t to %s MJ/t
+
+eu-mj_engine.mj_reader=MJ-Reader
+eu-mj_engine.mj_reader.time=%s seconds
+eu-mj_engine.mj_reader.direction=%s: %s MJ
+
+eu-mj_engine.help.battery.title=Battery Slot
+eu-mj_engine.help.battery=Insert any EU storing item\nto provide power to the engine.\nPower can also be cabled\nin from the back.
+eu-mj_engine.help.upgrade.title=Transformer Upgrade Slot
+eu-mj_engine.help.upgrade=Add transformer upgrades\nto increase the tier\nof power that can be accepted.
+eu-mj_engine.help.power_button.title=Output Config
+eu-mj_engine.help.power_button=Changes the MJ output\nof the engine by %s MJ/t
+
+buildcraft.guide.chapter.mod.eu-mj_engine=EU-MJ Engine
