@@ -7,3 +7,4 @@
 Currently a proof of concept, engines currently produce a static amount of MJ as soon as they have enough EU for it, which might not be the final mechanic.
 A way of producing EU back from MJ could be nice too.
 
+![Engine Example](http://i.imgur.com/znDzoLk.png)
