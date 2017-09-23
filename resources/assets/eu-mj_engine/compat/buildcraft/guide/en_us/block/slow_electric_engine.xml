@@ -1,0 +1,9 @@
+An engine that runs off LV (up to 32 EU/t) power.
+
+<recipes stack="eu-mj_engine:engines" data="0"/>
+
+Produces 1 MJ
+
+
+Next tier:
+<engineLink stack="eu-mj_engine:engines" data="1"/>

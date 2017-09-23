@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -23,7 +21,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -40,10 +37,8 @@ import buildcraft.api.enums.EnumEngineType;
 import buildcraft.api.mj.MjAPI;
 import buildcraft.lib.client.guide.GuideManager;
 import buildcraft.lib.client.guide.PageLine;
-import buildcraft.lib.client.guide.loader.MarkdownPageLoader;
+import buildcraft.lib.client.guide.loader.XmlPageLoader;
 import buildcraft.lib.client.guide.parts.GuideText;
-import buildcraft.lib.client.resource.ResourceRegistry;
-import buildcraft.lib.client.resource.TextureResourceHolder;
 import buildcraft.lib.gui.GuiStack;
 import buildcraft.lib.gui.ISimpleDrawable;
 import buildcraft.transport.BCTransportItems;
@@ -60,9 +55,8 @@ import com.chocohead.eumj.item.ItemReaderMJ;
 import com.chocohead.eumj.te.Engine_TEs;
 import com.chocohead.eumj.te.TileEntityEngine;
 import com.chocohead.eumj.util.AdvEngineRecipe;
-import com.chocohead.eumj.util.BetterTextureResourceHolder;
 
-@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.6];after:buildcrafttransport", version="@VERSION@")
+@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.7];after:buildcrafttransport", version="@VERSION@")
 public final class EngineMod {
 	public static final String MODID = "eu-mj_engine";
 	public static final CreativeTabs TAB = new CreativeTabs("EU-MJ Engine") {
@@ -213,12 +207,12 @@ public final class EngineMod {
 		}
 
 		//BuildCraft Lib loads pages in post-init, but it also loads first, so we do this here
-		MarkdownPageLoader.SPECIAL_FACTORIES.put("special.engineLink", after -> {
-			ItemStack stack = MarkdownPageLoader.loadItemStack(after);
+		XmlPageLoader.TAG_FACTORIES.put("engineLink", tag -> {
+			ItemStack stack = XmlPageLoader.loadItemStack(tag);
 
 			PageLine line;
 			if (StackUtil.isEmpty(stack)) {
-				line = new PageLine(1, "Missing item: "+after, false);
+				line = new PageLine(1, "Missing item: "+tag, false);
 			} else {
 				ISimpleDrawable icon = new GuiStack(stack);
 				line = new PageLine(icon, icon, 1, stack.getDisplayName(), true);
@@ -235,7 +229,6 @@ public final class EngineMod {
 				}
 			});
 		});
-		ResourceRegistry.INSTANCE.register(new BetterTextureResourceHolder(MODID, "guide/images/mj_reader.png", 176, 131), TextureResourceHolder.class);
 	}
 
 	@EventHandler
@@ -245,15 +238,6 @@ public final class EngineMod {
 
 			return te instanceof TileEntityEngine && ((TileEntityEngine) te).trySpin(side.getOpposite()) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
 		});
-	}
-
-	@EventHandler
-	@SideOnly(Side.CLIENT)
-	public void finish(FMLLoadCompleteEvent event) {
-		assert event.getSide().isClient();
-
-		//BuildCraft doesn't bother doing this itself, it makes life easier being able to change pages without having to restart the game
-		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> GuideManager.INSTANCE.reloadLang());
 	}
 
 

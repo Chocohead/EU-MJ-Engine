@@ -1,0 +1,12 @@
+An engine that runs off EV (up to 2048 EU/t) power.
+
+<recipes stack="eu-mj_engine:engines" data="3"/>
+
+Produces 15 MJ
+
+
+Previous tier:
+<engineLink stack="eu-mj_engine:engines" data="2"/>
+
+Next tier:
+<engineLink stack="eu-mj_engine:engines" data="4"/>
