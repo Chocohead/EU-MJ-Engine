@@ -12,11 +12,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import buildcraft.lib.gui.ContainerBC_Neptune;
-import buildcraft.lib.gui.GuiBC8;
+import buildcraft.lib.gui.BuildCraftGui;
 import buildcraft.lib.gui.IGuiElement;
+import buildcraft.lib.gui.ledger.LedgerHelp;
 import buildcraft.lib.gui.ledger.Ledger_Neptune;
-import buildcraft.lib.gui.pos.GuiRectangle;
 
 import ic2.core.ContainerBase;
 import ic2.core.gui.GuiElement;
@@ -33,39 +32,8 @@ import ic2.core.gui.dynamic.GuiParser.GuiNode;
  */
 @SideOnly(Side.CLIENT)
 public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<ContainerBase<B>> {
-	@FunctionalInterface
-	protected interface Background {
-		void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY);
-	}
-	@FunctionalInterface
-	protected interface Foreground {
-		void drawGuiContainerForegroundLayer(int mouseX, int mouseY);
-	}
-
 	protected final List<Consumer<Consumer<IGuiElement>>> BCelements = new ArrayList<>();
-	protected final GuiBC8<?> wrappedGUI = new GuiBC8<ContainerBC_Neptune>(null) {
-		{
-			wrappedBackground = this::drawGuiContainerBackgroundLayer;
-			wrappedForeground = this::drawGuiContainerForegroundLayer;
-
-			xSize = DynamicBridgeGUI.this.xSize;
-			ySize = DynamicBridgeGUI.this.ySize;
-		}
-
-		@Override
-		public void initGui() {
-			guiLeft = DynamicBridgeGUI.this.guiLeft;
-			guiTop = DynamicBridgeGUI.this.guiTop;
-
-			mc = DynamicBridgeGUI.this.mc;
-			itemRender = mc.getRenderItem();
-			fontRendererObj = mc.fontRendererObj;
-
-			wrappedGUI.guiElements.clear();
-		}
-	};
-	protected Background wrappedBackground;
-	protected Foreground wrappedForeground;
+	protected final BuildCraftGui wrappedGUI = new BuildCraftGui(this, BuildCraftGui.createWindowedArea(this));
 
 
 	public DynamicBridgeGUI(B base, EntityPlayer player, GuiNode guiNode) {
@@ -81,7 +49,7 @@ public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<Container
 	 *
 	 * @return The wrapped BC GUI
 	 */
-	public GuiBC8<?> getWrappedGUI() {
+	public BuildCraftGui getWrappedGUI() {
 		return wrappedGUI;
 	}
 
@@ -93,6 +61,13 @@ public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<Container
 	public void addElementProducer(Consumer<Consumer<IGuiElement>> producer) {
 		BCelements.add(producer);
 	}
+	
+	/**
+	 * Add the default help element to the wrapped GUI
+	 */
+	public void addHelpLedger() {
+		wrappedGUI.shownElements.add(new LedgerHelp(wrappedGUI, false));
+	}
 
 	/**
 	 * Get a view of {@link GuiElement}s that the GUI has.
@@ -102,85 +77,93 @@ public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<Container
 	public List<GuiElement<?>> getGuiElements() {
 		return Collections.unmodifiableList(elements);
 	}
+	
+	@Override
+	public void initGui() {
+		super.initGui();
+		
+		BCelements.forEach(element -> element.accept(wrappedGUI.shownElements::add)); 
+	}
 
 
 	// Bouncers >>
 	@Override
-	public void initGui() {
-		super.initGui();
-
-		wrappedGUI.setGuiSize(width, height);
-		wrappedGUI.initGui();
-
-		BCelements.forEach(element -> element.accept(wrappedGUI.guiElements::add));
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
+		
+		if (wrappedGUI.currentMenu == null || wrappedGUI.currentMenu.shouldFullyOverride()) {
+			//BuildCraft would call renderHoveredToolTip(mouseX, mouseY);
+			//But we've already done that as part of IC2
+			//A sort of fix for IC2 GuiElements is below, but it won't catch everything
+			//Drawing the background and foreground also both have similar issues
+		}
 	}
 
 	@Override
 	public void updateScreen() {
 		super.updateScreen();
 
-		wrappedGUI.ledgersLeft.update();
-		wrappedGUI.ledgersRight.update();
+		wrappedGUI.tick();
 	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-
-		wrappedBackground.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+		wrappedGUI.drawBackgroundLayer(partialTicks, mouseX, mouseY, this::drawDefaultBackground);
+		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY); //BC wouldn't want to call super, but IC2 has also needs it
+		wrappedGUI.drawElementBackgrounds();
 	}
 
 	@Override
 	protected void drawForegroundLayer(int mouseX, int mouseY) {
-		super.drawForegroundLayer(mouseX, mouseY);
-
-		wrappedForeground.drawGuiContainerForegroundLayer(mouseX + guiLeft, mouseY + guiTop);
+		super.drawForegroundLayer(mouseX, mouseY); //BC wouldn't want to call super, but IC2 has also needs it
+		
+		wrappedGUI.preDrawForeground(); //Will GL-shift everything, don't put anything else within block
+		wrappedGUI.drawElementForegrounds(this::drawDefaultBackground);
+		wrappedGUI.postDrawForeground(); //Pops everything back
+	}
+	
+	
+	@Override
+	protected void flushTooltips() {
+		noopTooltips = wrappedGUI.currentMenu != null && wrappedGUI.currentMenu.shouldFullyOverride();
+		super.flushTooltips();
+		noopTooltips = false;
+	}
+	
+	//Amazing fix to suppress tooltips best we can
+	private boolean noopTooltips = false;
+	
+	@Override
+	public void drawHoveringText(List<String> textLines, int x, int y) {
+		if (!noopTooltips) super.drawHoveringText(textLines, x, y);
 	}
 
+	
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 
-		wrappedGUI.mouse.setMousePosition(mouseX, mouseY);
-
-		GuiRectangle debugRect = new GuiRectangle(0, 0, 16, 16);
-		if (debugRect.contains(wrappedGUI.mouse)) {
-			GuiBC8.debugging = !GuiBC8.debugging;
-		}
-
-		for (IGuiElement element : wrappedGUI.guiElements) {
-			element.onMouseClicked(mouseButton);
-		}
-
-		wrappedGUI.ledgersLeft.onMouseClicked(mouseButton);
-		wrappedGUI.ledgersRight.onMouseClicked(mouseButton);
+		wrappedGUI.onMouseClicked(mouseX, mouseY, mouseButton);
 	}
 
 	@Override
 	protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 
-		wrappedGUI.mouse.setMousePosition(mouseX, mouseY);
-
-		for (IGuiElement element : wrappedGUI.guiElements) {
-			element.onMouseDragged(clickedMouseButton, timeSinceLastClick);
-		}
-
-		wrappedGUI.ledgersLeft.onMouseDragged(clickedMouseButton, timeSinceLastClick);
-		wrappedGUI.ledgersRight.onMouseDragged(clickedMouseButton, timeSinceLastClick);
+		wrappedGUI.onMouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 	}
 
 	@Override
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		super.mouseReleased(mouseX, mouseY, state);
 
-		wrappedGUI.mouse.setMousePosition(mouseX, mouseY);
-
-		for (IGuiElement element : wrappedGUI.guiElements) {
-			element.onMouseReleased(state);
+		wrappedGUI.onMouseReleased(mouseX, mouseY, state);
+	}
+	
+	@Override
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+		if (!wrappedGUI.onKeyTyped(typedChar, keyCode)) {
+			super.keyTyped(typedChar, keyCode);
 		}
-
-		wrappedGUI.ledgersLeft.onMouseReleased(state);
-		wrappedGUI.ledgersRight.onMouseReleased(state);
 	}
 }

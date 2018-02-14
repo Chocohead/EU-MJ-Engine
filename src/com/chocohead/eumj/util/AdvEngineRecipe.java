@@ -64,7 +64,7 @@ public class AdvEngineRecipe extends AdvRecipe implements IViewableGrid {
 		int i = 0, j = 0;
 		for (boolean[] section : shape) {
 			for (boolean item : section) {
-				out[j++] = item ? makeForInput(input[i++]) : ChangingItemStack.create(ItemStack.EMPTY);
+				out[j++] = item ? makeForInput(input[i++]) : new ChangingItemStack(ItemStack.EMPTY);
 			}
 		}
 
@@ -73,7 +73,7 @@ public class AdvEngineRecipe extends AdvRecipe implements IViewableGrid {
 
 	@Override
 	public ChangingItemStack getRecipeOutputs() {
-		return ChangingItemStack.create(output);
+		return new ChangingItemStack(output);
 	}
 
 	@Override

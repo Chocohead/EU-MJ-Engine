@@ -15,7 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -27,6 +26,7 @@ import ic2.api.item.IBoxable;
 
 import ic2.core.IC2;
 import ic2.core.IHasGui;
+import ic2.core.init.BlocksItems;
 import ic2.core.item.IHandHeldInventory;
 import ic2.core.item.ItemIC2;
 import ic2.core.ref.ItemName;
@@ -40,7 +40,7 @@ public class ItemReaderMJ extends ItemIC2 implements IHandHeldInventory, IBoxabl
 	public ItemReaderMJ() {
 		super(null);
 
-		GameRegistry.register(this, new ResourceLocation(EngineMod.MODID, NAME)).setUnlocalizedName(NAME).setCreativeTab(EngineMod.TAB);
+		BlocksItems.registerItem(this, new ResourceLocation(EngineMod.MODID, NAME)).setUnlocalizedName(NAME).setCreativeTab(EngineMod.TAB);
 
 		maxStackSize = 1;
 		setMaxDamage(0);

@@ -11,12 +11,13 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
@@ -24,14 +25,12 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.oredict.RecipeSorter;
-import net.minecraftforge.oredict.RecipeSorter.Category;
 
-import buildcraft.api.BCBlocks;
+import buildcraft.api.BCBlocks.Core;
 import buildcraft.api.BCItems;
+import buildcraft.api.BCModules;
 import buildcraft.api.blocks.CustomRotationHelper;
 import buildcraft.api.enums.EnumEngineType;
 import buildcraft.api.mj.MjAPI;
@@ -48,6 +47,7 @@ import ic2.api.item.IC2Items;
 
 import ic2.core.block.BlockTileEntity;
 import ic2.core.block.TeBlockRegistry;
+import ic2.core.init.Rezepte;
 import ic2.core.item.ItemIC2;
 import ic2.core.util.StackUtil;
 
@@ -56,7 +56,7 @@ import com.chocohead.eumj.te.Engine_TEs;
 import com.chocohead.eumj.te.TileEntityEngine;
 import com.chocohead.eumj.util.AdvEngineRecipe;
 
-@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.7];after:buildcrafttransport", version="@VERSION@")
+@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.15-pre7];after:buildcrafttransport", version="@VERSION@")
 public final class EngineMod {
 	public static final String MODID = "eu-mj_engine";
 	public static final CreativeTabs TAB = new CreativeTabs("EU-MJ Engine") {
@@ -111,23 +111,28 @@ public final class EngineMod {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		loadConfig(event.getSuggestedConfigurationFile());
-		event.getModLog().info("Running with "+(Conversion.MJperEU / MjAPI.MJ)+" MJ per EU or "+(MjAPI.MJ / Conversion.MJperEU)+" EU per MJ");
+		event.getModLog().info("Running with "+Conversion.MJperEU / MjAPI.MJ+" MJ per EU or "+MjAPI.MJ / Conversion.MJperEU+" EU per MJ");
 
 		//Blocks
 		engine = TeBlockRegistry.get(Engine_TEs.IDENTITY);
 		engine.setCreativeTab(TAB);
 		//Items
-		if (Loader.isModLoaded("buildcrafttransport")) {
+		if (BCModules.TRANSPORT.isLoaded()) {
 			readerMJ = new ItemReaderMJ();
 		}
 
-		RecipeSorter.register(MODID+":shaped", AdvEngineRecipe.class, Category.SHAPED, "after:ic2:shaped");
+		registerToSorter();
 
 		if (event.getSide().isClient()) {
-			MinecraftForge.EVENT_BUS.register(MagicModelLoader.class);
-			//ModelLoader.setCustomStateMapper(engine, block -> Collections.emptyMap());
 			readerMJ.registerModels(null);
 		}
+	}
+	
+	
+	@SuppressWarnings("deprecation")
+	private static void registerToSorter() {
+		//Thanks for this Forge
+		net.minecraftforge.oredict.RecipeSorter.register(MODID+":shaped", AdvEngineRecipe.class, net.minecraftforge.oredict.RecipeSorter.Category.SHAPED, "after:ic2:shaped");
 	}
 
 	private void loadConfig(File file) {
@@ -150,43 +155,43 @@ public final class EngineMod {
 	public void init(FMLInitializationEvent event) {
 		Engine_TEs.buildDummies(event.getSide().isClient());
 
-		if (BCBlocks.CORE_ENGINE != null) {
-			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
+		if (Core.ENGINE != null) {
+			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
 					"B", "E", "C",
 					'B', IC2Items.getItem("re_battery"),
-					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.STONE.ordinal()),
+					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.STONE.ordinal()),
 					'C', IC2Items.getItem("crafting", "circuit")));
 
-			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
+			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
 					"B", "E", "C",
 					'B', IC2Items.getItem("re_battery"),
-					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'C', IC2Items.getItem("crafting", "circuit")));
 
-			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
+			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
 					"BBB", "EPE", "CPC",
 					'B', IC2Items.getItem("advanced_re_battery"),
-					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
 					'C', IC2Items.getItem("crafting", "circuit")));
 
-			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
+			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
 					"BPB", "EEE", "CPC",
 					'B', IC2Items.getItem("energy_crystal"),
-					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
 					'C', IC2Items.getItem("crafting", "advanced_circuit")));
 
-			GameRegistry.addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
+			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
 					"BCB", "EEE", "MTM",
 					'B', IC2Items.getItem("lapotron_crystal"),
-					'E', new ItemStack(BCBlocks.CORE_ENGINE, 1, EnumEngineType.IRON.ordinal()),
+					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'C', IC2Items.getItem("crafting", "advanced_circuit"),
 					'M', IC2Items.getItem("resource", "advanced_machine"),
 					'T', IC2Items.getItem("te", "hv_transformer")));
 		}
 
-		if (readerMJ != null && BCItems.CORE_GEAR_GOLD != null && BCItems.TRANSPORT_PIPE_WOOD_POWER != null) {
+		if (readerMJ != null && BCItems.Core.GEAR_GOLD != null && BCTransportItems.pipePowerWood != null) {
 			Collection<ItemStack> pipes = new HashSet<>();
 
 			for (Item pipe : new Item[] {BCTransportItems.pipePowerCobble, BCTransportItems.pipePowerStone,
@@ -197,12 +202,12 @@ public final class EngineMod {
 			}
 
 			if (!pipes.isEmpty()) {
-				GameRegistry.addRecipe(new AdvEngineRecipe(new ItemStack(readerMJ),
+				addRecipe(new AdvEngineRecipe(new ItemStack(readerMJ),
 						" D ", "PGP", "p p",
 						'D', Items.GLOWSTONE_DUST,
-						'G', BCItems.CORE_GEAR_GOLD,
+						'G', BCItems.Core.GEAR_GOLD,
 						'P', pipes,
-						'p', BCItems.TRANSPORT_PIPE_WOOD_POWER));
+						'p', BCTransportItems.pipePowerWood));
 			}
 		}
 
@@ -229,6 +234,11 @@ public final class EngineMod {
 				}
 			});
 		});
+	}
+	
+	private static int ID = 0;
+	private static void addRecipe(IRecipe recipe) {
+		Rezepte.registerRecipe(new ResourceLocation(MODID, Integer.toString(ID++)), recipe);
 	}
 
 	@EventHandler

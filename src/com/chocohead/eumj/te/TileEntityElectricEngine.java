@@ -179,7 +179,8 @@ public abstract class TileEntityElectricEngine extends TileEntityEngine implemen
 	public GuiScreen getGui(EntityPlayer player, boolean isAdmin) {
 		GuiNode node = GuiParser.parse(teBlock);
 		DynamicBridgeGUI<TileEntityElectricEngine> gui = makeBridge(player, node, isAdmin);
-		gui.getWrappedGUI().ledgersRight.ledgers.add(new LedgerIEngine(gui.getWrappedGUI().ledgersRight, this));
+		gui.addHelpLedger();
+		gui.getWrappedGUI().shownElements.add(new LedgerIEngine(gui.getWrappedGUI(), this));
 		gui.addElementProducer(new Consumer<Consumer<IGuiElement>>() {
 			private IGuiArea makeArea(SlotNode node) {
 				return new GuiRectangle(node.x, node.y, node.style.width, node.style.height).offset(gui.getWrappedGUI().rootElement);

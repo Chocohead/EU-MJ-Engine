@@ -25,7 +25,7 @@ repositories {
 	}
 }
 
-version = "1.0"
+version = "2.0"
 group = "com.chocohead.eumj"
 archivesBaseName = "EU-MJ Engine"
 
@@ -35,17 +35,17 @@ compileJava {
 }
 
 minecraft {
-    version = "1.11.2-13.20.1.2393"
+    version = "1.12.2-14.23.1.2599"
     runDir = "run"
     replace "@VERSION@", project.version
     
-    mappings = "snapshot_20161220"
+    mappings = "snapshot_20171003"
     makeObfSourceJar = false
 }
 
 dependencies {
-	deobfCompile "net.industrial-craft:industrialcraft-2:2.7.75-ex111:dev"
-	deobfCompile "com.mod-buildcraft:buildcraft:7.99.7"
+	deobfCompile "net.industrial-craft:industrialcraft-2:2.8.53-ex112:dev"
+	deobfCompile "com.mod-buildcraft:buildcraft:7.99.15-pre7"
 	//provided fileTree(dir: 'lib', include: '*.jar')
 }
 

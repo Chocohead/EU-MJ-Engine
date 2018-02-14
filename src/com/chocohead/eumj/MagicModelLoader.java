@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
 
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,7 +26,7 @@ import buildcraft.lib.expression.DefaultContexts;
 import buildcraft.lib.expression.FunctionContext;
 import buildcraft.lib.expression.node.value.ITickableNode;
 import buildcraft.lib.expression.node.value.NodeVariableDouble;
-import buildcraft.lib.expression.node.value.NodeVariableString;
+import buildcraft.lib.expression.node.value.NodeVariableObject;
 import buildcraft.lib.misc.data.ModelVariableData;
 
 import com.chocohead.eumj.util.IEngine;
@@ -36,12 +37,13 @@ import com.chocohead.eumj.util.IEngine;
  *
  * @author Chocohead
  */
+@EventBusSubscriber(modid=EngineMod.MODID, value={Side.CLIENT})
 public class MagicModelLoader {
 	static final FunctionContext fnCtx = DefaultContexts.createWithAll();
 
 	static final NodeVariableDouble ENGINE_PROGRESS = fnCtx.putVariableDouble("progress");
-	static final NodeVariableString ENGINE_STAGE = fnCtx.putVariableString("stage");
-	static final NodeVariableString ENGINE_FACING = fnCtx.putVariableString("facing");
+	static final NodeVariableObject<EnumPowerStage> ENGINE_STAGE = fnCtx.putVariableObject("stage", EnumPowerStage.class);
+	static final NodeVariableObject<EnumFacing> ENGINE_FACING = fnCtx.putVariableObject("direction", EnumFacing.class);
 
 	public enum Engine {
 		SLOW_ELECTRIC_ENGINE, REGULAR_ELECTRIC_ENGINE, FAST_ELECTRIC_ENGINE, QUICK_ELECTRIC_ENGINE, ADJUSTABLE_ELECTRIC_ENGINE;
@@ -58,8 +60,8 @@ public class MagicModelLoader {
 		@SideOnly(Side.CLIENT)
 		public MutableQuad[] getEngineQuads(IEngine tile, float partialTicks) {
 			ENGINE_PROGRESS.value = tile.getProgressClient(partialTicks);
-			ENGINE_STAGE.value = tile.getPowerStage().getModelName();
-			ENGINE_FACING.value = tile.getFacing().getName();
+			ENGINE_STAGE.value = tile.getPowerStage();
+			ENGINE_FACING.value = tile.getFacing();
 
 			ModelVariableData modelData = tile.getModelData();
 			if (modelData.hasNoNodes()) {
@@ -91,8 +93,8 @@ public class MagicModelLoader {
 	@SideOnly(Side.CLIENT)
 	public static void onModelBake(ModelBakeEvent event) {
 		ENGINE_PROGRESS.value = 0.2;
-		ENGINE_STAGE.value = EnumPowerStage.GREEN.getModelName();
-		ENGINE_FACING.value = EnumFacing.UP.getName();
+		ENGINE_STAGE.value = EnumPowerStage.GREEN;
+		ENGINE_FACING.value = EnumFacing.UP;
 
 		IRegistry<ModelResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
 		ModelVariableData varData = new ModelVariableData();
@@ -107,7 +109,7 @@ public class MagicModelLoader {
 				quads.add(quad.toBakedItem());
 			}
 
-			modelRegistry.putObject(engine.getItemLocation(), new ModelItemSimple(quads, ModelItemSimple.TRANSFORM_BLOCK));
+			modelRegistry.putObject(engine.getItemLocation(), new ModelItemSimple(quads, ModelItemSimple.TRANSFORM_BLOCK, true));
 		}
 	}
 }

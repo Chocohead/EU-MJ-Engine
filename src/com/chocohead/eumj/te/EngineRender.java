@@ -1,6 +1,6 @@
 package com.chocohead.eumj.te;
 
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 
 import net.minecraftforge.client.model.animation.FastTESR;
 
@@ -18,7 +18,7 @@ public class EngineRender extends FastTESR<TileEntityEngine> {
 	}
 
 	@Override
-	public void renderTileEntityFast(TileEntityEngine engine, double x, double y, double z, float partialTicks, int destroyStage, VertexBuffer vb) {
+	public void renderTileEntityFast(TileEntityEngine engine, double x, double y, double z, float partialTicks, int destroyStage, float partial, BufferBuilder vb) {
 		IC2.platform.profilerStartSection("EU to MJ");
 		IC2.platform.profilerStartSection(this.engine.name());
 
