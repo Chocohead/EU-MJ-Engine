@@ -11,10 +11,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -44,17 +42,16 @@ import buildcraft.transport.BCTransportItems;
 
 import ic2.api.event.TeBlockFinalCallEvent;
 import ic2.api.item.IC2Items;
+import ic2.api.recipe.Recipes;
 
 import ic2.core.block.BlockTileEntity;
 import ic2.core.block.TeBlockRegistry;
-import ic2.core.init.Rezepte;
 import ic2.core.item.ItemIC2;
 import ic2.core.util.StackUtil;
 
 import com.chocohead.eumj.item.ItemReaderMJ;
 import com.chocohead.eumj.te.Engine_TEs;
 import com.chocohead.eumj.te.TileEntityEngine;
-import com.chocohead.eumj.util.AdvEngineRecipe;
 
 @Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.15-pre7];after:buildcrafttransport", version="@VERSION@")
 public final class EngineMod {
@@ -124,18 +121,9 @@ public final class EngineMod {
 			readerMJ = new ItemReaderMJ();
 		}
 
-		registerToSorter();
-
 		if (event.getSide().isClient()) {
 			if (readerMJ != null) readerMJ.registerModels(null);
 		}
-	}
-	
-	
-	@SuppressWarnings("deprecation")
-	private static void registerToSorter() {
-		//Thanks for this Forge
-		net.minecraftforge.oredict.RecipeSorter.register(MODID+":shaped", AdvEngineRecipe.class, net.minecraftforge.oredict.RecipeSorter.Category.SHAPED, "after:ic2:shaped");
 	}
 
 	private void loadConfig(File file) {
@@ -159,39 +147,39 @@ public final class EngineMod {
 		Engine_TEs.buildDummies(event.getSide().isClient());
 
 		if (Core.ENGINE != null) {
-			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
+			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
 					"B", "E", "C",
 					'B', IC2Items.getItem("re_battery"),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.STONE.ordinal()),
-					'C', IC2Items.getItem("crafting", "circuit")));
+					'C', IC2Items.getItem("crafting", "circuit"));
 
-			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
+			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
 					"B", "E", "C",
 					'B', IC2Items.getItem("re_battery"),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
-					'C', IC2Items.getItem("crafting", "circuit")));
+					'C', IC2Items.getItem("crafting", "circuit"));
 
-			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
+			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
 					"BBB", "EPE", "CPC",
 					'B', IC2Items.getItem("advanced_re_battery"),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
-					'C', IC2Items.getItem("crafting", "circuit")));
+					'C', IC2Items.getItem("crafting", "circuit"));
 
-			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
+			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
 					"BPB", "EEE", "CPC",
 					'B', IC2Items.getItem("energy_crystal"),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
-					'C', IC2Items.getItem("crafting", "advanced_circuit")));
+					'C', IC2Items.getItem("crafting", "advanced_circuit"));
 
-			addRecipe(new AdvEngineRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
+			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
 					"BCB", "EEE", "MTM",
 					'B', IC2Items.getItem("lapotron_crystal"),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'C', IC2Items.getItem("crafting", "advanced_circuit"),
 					'M', IC2Items.getItem("resource", "advanced_machine"),
-					'T', IC2Items.getItem("te", "hv_transformer")));
+					'T', IC2Items.getItem("te", "hv_transformer"));
 		}
 
 		if (readerMJ != null && BCItems.Core.GEAR_GOLD != null && BCTransportItems.pipePowerWood != null) {
@@ -205,12 +193,12 @@ public final class EngineMod {
 			}
 
 			if (!pipes.isEmpty()) {
-				addRecipe(new AdvEngineRecipe(new ItemStack(readerMJ),
+				Recipes.advRecipes.addRecipe(new ItemStack(readerMJ),
 						" D ", "PGP", "p p",
 						'D', Items.GLOWSTONE_DUST,
 						'G', BCItems.Core.GEAR_GOLD,
 						'P', pipes,
-						'p', BCTransportItems.pipePowerWood));
+						'p', BCTransportItems.pipePowerWood);
 			}
 		}
 
@@ -237,11 +225,6 @@ public final class EngineMod {
 				}
 			});
 		});
-	}
-	
-	private static int ID = 0;
-	private static void addRecipe(IRecipe recipe) {
-		Rezepte.registerRecipe(new ResourceLocation(MODID, Integer.toString(ID++)), recipe);
 	}
 
 	@EventHandler
