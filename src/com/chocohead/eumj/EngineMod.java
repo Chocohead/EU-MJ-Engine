@@ -106,6 +106,9 @@ public final class EngineMod {
 	@SubscribeEvent
 	public void register(TeBlockFinalCallEvent event) {
 		TeBlockRegistry.addAll(Engine_TEs.class, Engine_TEs.IDENTITY);
+		TeBlockRegistry.addCreativeRegisterer((list, block, item, tab) -> {
+			if (tab == TAB || tab == CreativeTabs.SEARCH) Arrays.stream(Engine_TEs.VALUES).filter(Engine_TEs::hasItem).forEach(type -> list.add(block.getItemStack(type)));
+		}, Engine_TEs.IDENTITY);
 	}
 
 	@EventHandler
@@ -124,7 +127,7 @@ public final class EngineMod {
 		registerToSorter();
 
 		if (event.getSide().isClient()) {
-			readerMJ.registerModels(null);
+			if (readerMJ != null) readerMJ.registerModels(null);
 		}
 	}
 	
