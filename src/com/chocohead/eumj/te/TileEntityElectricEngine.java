@@ -58,7 +58,7 @@ public abstract class TileEntityElectricEngine extends TileEntityEngine implemen
 	public final InvSlotUpgrade upgrade;
 
 	@GuiSynced
-	protected boolean active = false;
+	protected boolean engineActive = false;
 
 	public TileEntityElectricEngine(int tier) {
 		this.tier = tier;
@@ -137,12 +137,12 @@ public abstract class TileEntityElectricEngine extends TileEntityEngine implemen
 		double input = Conversion.MJtoEU(output);
 
 		if (energy.canUseEnergy(input) && redstone.hasRedstoneInput()) {
-			active = true;
+			engineActive = true;
 
 			addPower(output);
 			energy.useEnergy(input);
 		} else {
-			active = false;
+			engineActive = false;
 		}
 	}
 
@@ -235,7 +235,7 @@ public abstract class TileEntityElectricEngine extends TileEntityEngine implemen
 	@Override
 	@SideOnly(Side.CLIENT)
 	public long getActiveOutput() {
-		return active ? getOutput() : 0;
+		return engineActive ? getOutput() : 0;
 	}
 	// << IHasGUI
 

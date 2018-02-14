@@ -24,6 +24,7 @@ import buildcraft.lib.client.model.ModelItemSimple;
 import buildcraft.lib.client.model.MutableQuad;
 import buildcraft.lib.expression.DefaultContexts;
 import buildcraft.lib.expression.FunctionContext;
+import buildcraft.lib.expression.minecraft.ExpressionCompat;
 import buildcraft.lib.expression.node.value.ITickableNode;
 import buildcraft.lib.expression.node.value.NodeVariableDouble;
 import buildcraft.lib.expression.node.value.NodeVariableObject;
@@ -39,7 +40,7 @@ import com.chocohead.eumj.util.IEngine;
  */
 @EventBusSubscriber(modid=EngineMod.MODID, value={Side.CLIENT})
 public class MagicModelLoader {
-	static final FunctionContext fnCtx = DefaultContexts.createWithAll();
+	static final FunctionContext fnCtx = new FunctionContext("", ExpressionCompat.ENUM_POWER_STAGE, DefaultContexts.createWithAll());
 
 	static final NodeVariableDouble ENGINE_PROGRESS = fnCtx.putVariableDouble("progress");
 	static final NodeVariableObject<EnumPowerStage> ENGINE_STAGE = fnCtx.putVariableObject("stage", EnumPowerStage.class);
