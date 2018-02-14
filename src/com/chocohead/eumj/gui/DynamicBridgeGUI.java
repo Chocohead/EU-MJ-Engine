@@ -95,7 +95,6 @@ public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<Container
 			//BuildCraft would call renderHoveredToolTip(mouseX, mouseY);
 			//But we've already done that as part of IC2
 			//A sort of fix for IC2 GuiElements is below, but it won't catch everything
-			//Drawing the background and foreground also both have similar issues
 		}
 	}
 
@@ -108,17 +107,21 @@ public class DynamicBridgeGUI<B extends IInventory> extends DynamicGui<Container
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		wrappedGUI.drawBackgroundLayer(partialTicks, mouseX, mouseY, this::drawDefaultBackground);
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY); //BC wouldn't want to call super, but IC2 has also needs it
+		wrappedGUI.drawBackgroundLayer(partialTicks, mouseX, mouseY, () -> super.drawBackgroundAndTitle(partialTicks, mouseX - guiLeft, mouseY - guiTop));
+		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
 		wrappedGUI.drawElementBackgrounds();
 	}
 
 	@Override
+	protected void drawBackgroundAndTitle(float partialTicks, int mouseX, int mouseY) {
+	}
+
+	@Override
 	protected void drawForegroundLayer(int mouseX, int mouseY) {
-		super.drawForegroundLayer(mouseX, mouseY); //BC wouldn't want to call super, but IC2 has also needs it
+		super.drawForegroundLayer(mouseX, mouseY);
 		
 		wrappedGUI.preDrawForeground(); //Will GL-shift everything, don't put anything else within block
-		wrappedGUI.drawElementForegrounds(this::drawDefaultBackground);
+		wrappedGUI.drawElementForegrounds(() -> super.drawBackgroundAndTitle(wrappedGUI.getLastPartialTicks(), mouseX - guiLeft, mouseY - guiTop));
 		wrappedGUI.postDrawForeground(); //Pops everything back
 	}
 	
