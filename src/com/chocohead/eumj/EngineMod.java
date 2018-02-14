@@ -3,10 +3,19 @@ package com.chocohead.eumj;
 import static com.chocohead.eumj.EngineMod.MODID;
 
 import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -33,8 +42,12 @@ import buildcraft.api.blocks.CustomRotationHelper;
 import buildcraft.api.enums.EnumEngineType;
 import buildcraft.api.mj.MjAPI;
 import buildcraft.lib.client.guide.GuideManager;
+import buildcraft.lib.client.guide.PageEntry;
 import buildcraft.lib.client.guide.PageLine;
+import buildcraft.lib.client.guide.loader.IPageLoader;
 import buildcraft.lib.client.guide.loader.XmlPageLoader;
+import buildcraft.lib.client.guide.loader.entry.EntryTypeItem;
+import buildcraft.lib.client.guide.loader.entry.ItemStackValueFilter;
 import buildcraft.lib.client.guide.parts.GuideText;
 import buildcraft.lib.gui.GuiStack;
 import buildcraft.lib.gui.ISimpleDrawable;
@@ -47,6 +60,7 @@ import ic2.api.recipe.Recipes;
 import ic2.core.block.BlockTileEntity;
 import ic2.core.block.TeBlockRegistry;
 import ic2.core.item.ItemIC2;
+import ic2.core.util.ReflectionUtil;
 import ic2.core.util.StackUtil;
 
 import com.chocohead.eumj.item.ItemReaderMJ;
@@ -202,6 +216,9 @@ public final class EngineMod {
 			}
 		}
 
+		//BuildCraft bounces the loading of Markdown into XML anyway, we'll just go straight there thank you.
+		ReflectionUtil.<Map<String, IPageLoader>>getFieldValue(ReflectionUtil.getField(GuideManager.class, "PAGE_LOADERS"), null).put("xml", XmlPageLoader.INSTANCE);
+
 		//BuildCraft Lib loads pages in post-init, but it also loads first, so we do this here
 		XmlPageLoader.TAG_FACTORIES.put("engineLink", tag -> {
 			ItemStack stack = XmlPageLoader.loadItemStack(tag);
@@ -234,6 +251,52 @@ public final class EngineMod {
 
 			return te instanceof TileEntityEngine && ((TileEntityEngine) te).trySpin(side.getOpposite()) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
 		});
+
+		if (event.getSide().isClient()) {
+			((IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new IResourceManagerReloadListener() {
+				private final MethodHandle entries = findEntries();
+				private final MethodHandle meta = makeSetter("matchMeta");
+				private final MethodHandle nbt = makeSetter("matchNbt");
+
+				private MethodHandle findEntries() {
+					try {
+						return MethodHandles.lookup().unreflectGetter(ReflectionUtil.getField(GuideManager.class, "entries"));
+					} catch (ReflectiveOperationException e) {
+						throw new RuntimeException("Error finding list of guide book page entries", e);
+					}
+				}
+
+				private MethodHandle makeSetter(String name) {
+					try {
+						return MethodHandles.lookup().unreflectSetter(ReflectionUtil.getField(ItemStackValueFilter.class, name));
+					} catch (ReflectiveOperationException e) {
+						throw new RuntimeException("Error finding setting for ItemStackValueFilter", e);
+					}
+				}
+
+				@Override
+				public void onResourceManagerReload(IResourceManager resourceManager) {
+					try {
+						onUnsafeReload();
+					} catch (Throwable t) {
+						throw new RuntimeException("Error reloading engine guide book pages", t);
+					}
+				}
+
+				private void onUnsafeReload() throws Throwable {
+					for (PageEntry<?> page : (List<PageEntry<?>>) entries.invokeExact(GuideManager.INSTANCE)) {
+						if (page.entryType == EntryTypeItem.INSTANCE) {
+							ItemStackValueFilter value = (ItemStackValueFilter) page.value;
+
+							if (StackUtil.checkItemEquality(value.stack.baseStack, engine.getItem())) {
+								meta.invokeExact(value, true);
+								nbt.invokeExact(value, false);
+							}
+						}
+					}
+				}
+			});
+		}
 	}
 
 
