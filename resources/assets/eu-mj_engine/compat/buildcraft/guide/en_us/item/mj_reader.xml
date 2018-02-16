@@ -1,5 +1,5 @@
 A version of the EU-Reader that can be used to measure MJ flow.
-
+<chapter name="Recipe"/>
 <recipes stack="eu-mj_engine:mj_reader"/>
 
 Due to the nature of MJ, the MJ-Reader continuously takes measurements over time, in order to get an average flow rate.

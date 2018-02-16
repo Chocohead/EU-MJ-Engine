@@ -1,9 +1,11 @@
 An engine that runs off EV (up to 2048 EU/t) power.
 
+<chapter name="Recipe"/>
 <recipes stack="eu-mj_engine:engines" data="4"/>
 
 Produces a configurable amount of MJ, from 1 to over 800.
 
+<new_page/>
 Previous tier:
 <engineLink stack="eu-mj_engine:engines" data="2"/>
 

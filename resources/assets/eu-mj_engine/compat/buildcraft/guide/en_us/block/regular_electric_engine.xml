@@ -1,10 +1,11 @@
 An engine that runs off MV (up to 128 EU/t) power.
 
+<chapter name="Recipe"/>
 <recipes stack="eu-mj_engine:engines" data="1"/>
 
 Produces 5 MJ
 
-
+<new_page/>
 Previous tier:
 <engineLink stack="eu-mj_engine:engines" data="0"/>
 
