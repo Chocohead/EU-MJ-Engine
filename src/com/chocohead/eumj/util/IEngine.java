@@ -10,7 +10,9 @@ import buildcraft.lib.engine.TileEngineBase_BC8;
 import buildcraft.lib.misc.data.ModelVariableData;
 
 /**
- * Pull outs of methods from {@link TileEngineBase_BC8} to allow more abstract implementations
+ * <p>Pull outs of methods from {@link TileEngineBase_BC8} to allow more abstract implementations</p>
+ * 
+ * TODO: Integrate support for {@link buildcraft.api.power.IEngine} once BuildCraft actually uses it
  *
  * @author Chocohead
  */
