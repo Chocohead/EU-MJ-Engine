@@ -150,33 +150,33 @@ public final class EngineMod {
 		if (Core.ENGINE != null) {
 			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.slow_electric_engine),
 					"B", "E", "C",
-					'B', IC2Items.getItem("re_battery"),
+					'B', anyCharge(IC2Items.getItem("re_battery")),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.STONE.ordinal()),
 					'C', IC2Items.getItem("crafting", "circuit"));
 
 			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.regular_electric_engine),
 					"B", "E", "C",
-					'B', IC2Items.getItem("re_battery"),
+					'B', anyCharge(IC2Items.getItem("re_battery")),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'C', IC2Items.getItem("crafting", "circuit"));
 
 			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.fast_electric_engine),
 					"BBB", "EPE", "CPC",
-					'B', IC2Items.getItem("advanced_re_battery"),
+					'B', anyCharge(IC2Items.getItem("advanced_re_battery")),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
 					'C', IC2Items.getItem("crafting", "circuit"));
 
 			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.quick_electric_engine),
 					"BPB", "EEE", "CPC",
-					'B', IC2Items.getItem("energy_crystal"),
+					'B', anyCharge(IC2Items.getItem("energy_crystal")),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'P', IC2Items.getItem("crafting", "alloy"),
 					'C', IC2Items.getItem("crafting", "advanced_circuit"));
 
 			Recipes.advRecipes.addRecipe(engine.getItemStack(Engine_TEs.adjustable_electric_engine),
 					"BCB", "EEE", "MTM",
-					'B', IC2Items.getItem("lapotron_crystal"),
+					'B', anyCharge(IC2Items.getItem("lapotron_crystal")),
 					'E', new ItemStack(Core.ENGINE, 1, EnumEngineType.IRON.ordinal()),
 					'C', IC2Items.getItem("crafting", "advanced_circuit"),
 					'M', IC2Items.getItem("resource", "advanced_machine"),
@@ -229,6 +229,10 @@ public final class EngineMod {
 				}
 			});
 		});
+	}
+	
+	private static ItemStack anyCharge(ItemStack stack) {
+		return StackUtil.copyWithWildCard(stack);
 	}
 
 	@EventHandler
