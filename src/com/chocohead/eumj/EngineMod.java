@@ -5,7 +5,6 @@ import static com.chocohead.eumj.EngineMod.MODID;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 
 import net.minecraft.creativetab.CreativeTabs;
@@ -33,12 +32,6 @@ import buildcraft.api.BCModules;
 import buildcraft.api.blocks.CustomRotationHelper;
 import buildcraft.api.enums.EnumEngineType;
 import buildcraft.api.mj.MjAPI;
-import buildcraft.lib.client.guide.GuideManager;
-import buildcraft.lib.client.guide.PageLine;
-import buildcraft.lib.client.guide.loader.XmlPageLoader;
-import buildcraft.lib.client.guide.parts.GuideText;
-import buildcraft.lib.gui.GuiStack;
-import buildcraft.lib.gui.ISimpleDrawable;
 import buildcraft.transport.BCTransportItems;
 
 import ic2.api.event.TeBlockFinalCallEvent;
@@ -203,32 +196,11 @@ public final class EngineMod {
 			}
 		}
 
-		//BuildCraft bounces the loading of Markdown into XML anyway, we'll just go straight there thank you.
-		GuideManager.PAGE_LOADERS.put("xml", XmlPageLoader.INSTANCE);
-
-		//BuildCraft Lib loads pages in post-init, but it also loads first, so we do this here
-		XmlPageLoader.TAG_FACTORIES.put("engineLink", tag -> {
-			ItemStack stack = XmlPageLoader.loadItemStack(tag);
-
-			PageLine line;
-			if (StackUtil.isEmpty(stack)) {
-				line = new PageLine(1, "Missing item: "+tag, false);
-			} else {
-				ISimpleDrawable icon = new GuiStack(stack);
-				line = new PageLine(icon, icon, 1, stack.getDisplayName(), true);
-			}
-
-			return Collections.singletonList(gui -> new GuideText(gui, line) {
-				@Override
-				public PagePosition handleMouseClick(int x, int y, int width, int height, PagePosition current, int index, int mouseX, int mouseY) {
-					if (line.link && (wasHovered || wasIconHovered)) {
-						gui.openPage(GuideManager.INSTANCE.getPageFor(stack).createNew(gui));
-					}
-
-					return renderLine(current, text, x, y, width, height, -1);
-				}
-			});
-		});
+		if (event.getSide().isClient()) {
+			//BuildCraft Lib loads pages in post-init, but it also loads first, so we do this here
+			GuideThings.addLoaders();
+			GuideThings.addTags();
+		}
 	}
 	
 	private static ItemStack anyCharge(ItemStack stack) {
