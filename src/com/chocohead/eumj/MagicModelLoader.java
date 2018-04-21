@@ -24,7 +24,7 @@ import buildcraft.lib.client.model.ModelItemSimple;
 import buildcraft.lib.client.model.MutableQuad;
 import buildcraft.lib.expression.DefaultContexts;
 import buildcraft.lib.expression.FunctionContext;
-import buildcraft.lib.expression.minecraft.ExpressionCompat;
+import buildcraft.lib.misc.ExpressionCompat;
 import buildcraft.lib.expression.node.value.ITickableNode;
 import buildcraft.lib.expression.node.value.NodeVariableDouble;
 import buildcraft.lib.expression.node.value.NodeVariableObject;
