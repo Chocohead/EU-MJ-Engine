@@ -2,6 +2,8 @@ package com.chocohead.eumj;
 
 import java.util.Collections;
 
+import com.chocohead.eumj.te.Engine_TEs;
+
 import net.minecraft.item.ItemStack;
 
 import net.minecraftforge.fml.relauncher.Side;
@@ -11,6 +13,7 @@ import buildcraft.lib.client.guide.GuideManager;
 import buildcraft.lib.client.guide.PageLine;
 import buildcraft.lib.client.guide.loader.XmlPageLoader;
 import buildcraft.lib.client.guide.parts.GuideText;
+import buildcraft.lib.client.guide.ref.GuideGroupManager;
 import buildcraft.lib.gui.GuiStack;
 import buildcraft.lib.gui.ISimpleDrawable;
 
@@ -47,5 +50,14 @@ class GuideThings {
 				}
 			});
 		});
+		Object[] engines = {
+            EngineMod.engine.getItemStack(Engine_TEs.slow_electric_engine),
+            EngineMod.engine.getItemStack(Engine_TEs.regular_electric_engine),
+            EngineMod.engine.getItemStack(Engine_TEs.fast_electric_engine),
+            EngineMod.engine.getItemStack(Engine_TEs.quick_electric_engine),
+            EngineMod.engine.getItemStack(Engine_TEs.adjustable_electric_engine),
+		};
+        GuideGroupManager.addEntries("buildcraft", "pipe_power_providers", engines);
+        GuideGroupManager.addEntries("buildcraft", "full_power_providers", engines);
 	}
 }
