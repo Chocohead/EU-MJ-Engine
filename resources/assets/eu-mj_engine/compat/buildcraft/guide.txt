@@ -1,0 +1,11 @@
+~{buildcraft/json/insn}
+
+import "buildcraftlib:util" "buildcraftcore:main"
+
+block_engine "slow_electric_engine" "{eu-mj_engine:engines, 1, 0}"
+block_engine "regular_electric_engine" "{eu-mj_engine:engines, 1, 1}"
+block_engine "fast_electric_engine" "{eu-mj_engine:engines, 1, 2}"
+block_engine "quick_electric_engine" "{eu-mj_engine:engines, 1, 3}"
+block_engine "adjustable_electric_engine" "{eu-mj_engine:engines, 1, 4}"
+
+tool "mj_reader"
