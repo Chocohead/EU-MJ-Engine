@@ -50,12 +50,13 @@ class GuideThings {
 				}
 			});
 		});
+
 		Object[] engines = {
-            EngineMod.engine.getItemStack(Engine_TEs.slow_electric_engine),
-            EngineMod.engine.getItemStack(Engine_TEs.regular_electric_engine),
-            EngineMod.engine.getItemStack(Engine_TEs.fast_electric_engine),
-            EngineMod.engine.getItemStack(Engine_TEs.quick_electric_engine),
-            EngineMod.engine.getItemStack(Engine_TEs.adjustable_electric_engine),
+			EngineMod.engine.getItemStack(Engine_TEs.slow_electric_engine),
+			EngineMod.engine.getItemStack(Engine_TEs.regular_electric_engine),
+			EngineMod.engine.getItemStack(Engine_TEs.fast_electric_engine),
+			EngineMod.engine.getItemStack(Engine_TEs.quick_electric_engine),
+			EngineMod.engine.getItemStack(Engine_TEs.adjustable_electric_engine),
 		};
         GuideGroupManager.addEntries("buildcraft", "pipe_power_providers", engines);
         GuideGroupManager.addEntries("buildcraft", "full_power_providers", engines);
