@@ -28,7 +28,7 @@ class GuideThings {
 	
 	@SideOnly(Side.CLIENT)
 	public static void addTags() {
-		XmlPageLoader.TAG_FACTORIES.put("engineLink", tag -> {
+		XmlPageLoader.TAG_FACTORIES.put("engineLink", (tag, profiler) -> {
 			ItemStack stack = XmlPageLoader.loadItemStack(tag);
 
 			PageLine line;

@@ -113,16 +113,6 @@ public enum Engine_TEs implements ITeBlock, ITeBlockSpecialItem {
 	}
 
 	@Override
-	public void setPlaceHandler(ITePlaceHandler handler) {
-		throw new UnsupportedOperationException("No place handlers needed!");
-	}
-
-	@Override
-	public ITePlaceHandler getPlaceHandler() {
-		return null;
-	}
-
-	@Override
 	public boolean isTransparent() {
 		return true;
 	}
