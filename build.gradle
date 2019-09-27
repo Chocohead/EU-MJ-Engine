@@ -25,7 +25,7 @@ repositories {
 	}
 }
 
-version = "2.6.0"
+version = "2.7.0"
 group = "com.chocohead.eumj"
 archivesBaseName = "EU-MJ Engine"
 
@@ -45,7 +45,7 @@ minecraft {
 
 dependencies {
 	deobfCompile "net.industrial-craft:industrialcraft-2:2.8.111-ex112:dev"
-	deobfCompile "com.mod-buildcraft:buildcraft-main:7.99.24.1"
+	deobfCompile "com.mod-buildcraft:buildcraft-main:7.99.24.3"
 	//provided fileTree(dir: 'lib', include: '*.jar')
 }
 
