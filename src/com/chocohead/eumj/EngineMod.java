@@ -47,7 +47,7 @@ import com.chocohead.eumj.item.ItemReaderMJ;
 import com.chocohead.eumj.te.Engine_TEs;
 import com.chocohead.eumj.te.TileEntityEngine;
 
-@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.22, 7.99.24.3];after:buildcrafttransport", version="@VERSION@")
+@Mod(modid=MODID, name="EU-MJ Engine", dependencies="required-after:ic2;required-after:buildcraftenergy@[7.99.22, 7.99.24.5];after:buildcrafttransport", version="@VERSION@")
 public final class EngineMod {
 	public static final String MODID = "eu-mj_engine";
 	public static final CreativeTabs TAB = new CreativeTabs("EU-MJ Engine") {
