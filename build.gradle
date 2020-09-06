@@ -44,7 +44,7 @@ minecraft {
 }
 
 dependencies {
-	deobfCompile "net.industrial-craft:industrialcraft-2:2.8.111-ex112:dev"
+	deobfCompile "net.industrial-craft:industrialcraft-2:2.8.220-ex112:dev"
 	deobfCompile "com.mod-buildcraft:buildcraft-main:7.99.24.5"
 	//provided fileTree(dir: 'lib', include: '*.jar')
 }
