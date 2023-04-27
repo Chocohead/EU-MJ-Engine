@@ -1,3 +1,5 @@
+# MAY APEAR BUGS BECAUSE IM NOT MODDER ACTUALLY. IF YOU FOUND BUG - TELL ME!
+
 ## EU-MJ Engine
 
 * Adds 5 different EU consuming engines for producing [BuildCraft's](https://github.com/BuildCraft/BuildCraft) MJ.
